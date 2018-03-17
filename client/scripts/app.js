@@ -18,7 +18,7 @@ var app = {
   init: function() {
     $('#send').submit(function(event) {
       event.preventDefault();
-      app.test();
+      app.handleSubmit();
     });
   },
   roomFilter: function() {
@@ -120,20 +120,18 @@ var app = {
     if (!app.friends.includes(clickedName)) {
       app.friends.push(clickedName);
     }
-    
     app.fetch();
   },
 
   handleSubmit: function() {
-    console.log('in handle Submit');
     var messageText = $('#message').val();
     var roomName = app.currentRoom;
     var url = window.location.search;
     var userName = url.slice(url.search('=') + 1);
     var message = {
-      username: userName,
-      text: messageText,
-      roomname: roomName
+      'username': userName,
+      'text': messageText,
+      'roomname': roomName
     };
     app.send(message);
   },
@@ -152,9 +150,22 @@ var app = {
       return htmlEntity[s];
     });
   },
-  test: function() {
-    console.log('in the test function');
-  }
+
+  decode: function(string){
+    // revert back to original code
+    var htmlEntity = {
+      "&amp;": "&",
+      "&lt;": "<",
+      "&gt;": ">",
+      '&quot;': '"',
+      '&#39;': "'",
+      '&#x2F;': "/"
+    }
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+      return htmlEntity[s];
+    });
+  },
+
 
 };
 
@@ -162,7 +173,6 @@ var app = {
 
 $(document).ready(function() {
   $('.username').on('click', this, app.handleUsernameClick);
-  console.log('works');
   app.init();
   $('#roomSelect').on('change', app.roomFilter);
 });
