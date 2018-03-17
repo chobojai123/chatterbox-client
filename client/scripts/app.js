@@ -1,22 +1,24 @@
 // YOUR CODE HERE:
 var app = {
+  serverURL: 'http://parse.sfm8.hackreactor.com/chatterbox/classes/messages',
   init: function() {
     // app.users = {}
     // app.rooms = {}
-    app.serverURL = 'http://parse.CAMPUS.hackreactor.com/chatterbox/sfm8/messages';
-    $('.username').on('click', this.handleUsernameClick);
-    $('#send .submit').on('submit', this, this.handleSubmit);
-    $('#roomSelect').on('change', this.roomFilter);
+    $(document).ready(function() {
+      $('.username').on('click', app.handleUsernameClick);
+      $('#send .submit').on('submit', this, app.handleSubmit);
+      $('#roomSelect').on('change', app.roomFilter);
+    });
   },
   roomFilter: function() {
     var room = $('#roomSelect :selected').text();
-    var dataReq = {'roomname': room};
-    app.send(room);
+    console.log(room);
+    // var dataReq = {'roomname': room};
   },
   send: function(message) {
     $.ajax({
       // This is the url you should use to communicate with the parse API server.
-      url: this.serverURL,
+      url: app.serverURL,
       type: 'POST',
       data: JSON.stringify(message),
       contentType: 'application/json',
@@ -32,7 +34,7 @@ var app = {
   fetch: function() {
     $.ajax({
       // This is the url you should use to communicate with the parse API server.
-      url: this.serverURL,
+      url: app.serverURL,
       type: 'GET',
       //data: JSON.stringify(message),
       contentType: 'application/json',
