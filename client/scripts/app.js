@@ -16,13 +16,12 @@ var app = {
   currentRoom: undefined,
   server: 'http://parse.sfm8.hackreactor.com/chatterbox/classes/messages',
   init: function() {
-    $('#send').submit(app.test);
-    // app.friends = [];
-    // app.rooms = [];
-    // app.server = 'http://parse.sfm8.hackreactor.com/chatterbox/classes/messages';
+    $('#send').submit(function(event) {
+      event.preventDefault();
+      app.test();
+    });
   },
   roomFilter: function() {
-    console.log('in roomFilter');
     var roomFiltered = $('#roomSelect :selected').text();
     app.currentRoom = roomFiltered;
     app.fetch();
@@ -51,10 +50,7 @@ var app = {
       //data: JSON.stringify(message),
       contentType: 'application/json',
       success: function (data) {
-        // console.log('chatterbox: Message sent');
-        // if message has a room not in app.room, renderRoom (after html escaping)
-        // only display messages for that room
-        // renderMessage
+        // reset rooms to only those found in most recent get request
         app.rooms = [];
         var roomsRendered = {}
         // if user has just loaded page and hasn't chosen a room, choose room with most messages
@@ -76,6 +72,7 @@ var app = {
           }
           app.currentRoom = popularRoom;
         }
+        // get rid of all previous room options
         $('#roomSelect').empty();
         // render rooms from all fetched messages
         for (var i = 0; i < app.rooms.length; i++) {
@@ -102,9 +99,7 @@ var app = {
     $('#chats').empty();
   },
   renderMessage: function(message) {
-    //html escape message here
-    //if there is friends, bold message
-    //maybe contain function? *need to check
+    // get message username and roomname and escape any malicious code
     var messageUserName = app.escapeAttack(message.username);
     var messageText = app.escapeAttack(message.text);  
     if (app.friends.includes(message.username)) {
@@ -115,15 +110,17 @@ var app = {
     $('.username').on('click', this, app.handleUsernameClick);
   },
   renderRoom: function(roomName) {
+    // add roomname to room options after escaping any malicious code
     var roomName = app.escapeAttack(roomName);
     $('#roomSelect').prepend(`<option value="${roomName}">${roomName}</option>`);
   },
   handleUsernameClick: function() {
+    // add clicked username to user's friends (app.friends array)
     var clickedName = this.innerText;
-    console.log(clickedName);
     if (!app.friends.includes(clickedName)) {
       app.friends.push(clickedName);
     }
+    
     app.fetch();
   },
 
@@ -131,10 +128,14 @@ var app = {
     console.log('in handle Submit');
     var messageText = $('#message').val();
     var roomName = app.currentRoom;
-    // get username
-    // send ajax post request
-    // clear text
-    // $('#message').val('');
+    var url = window.location.search;
+    var userName = url.slice(url.search('=') + 1);
+    var message = {
+      username: userName,
+      text: messageText,
+      roomname: roomName
+    };
+    app.send(message);
   },
 
   escapeAttack: function(string){
